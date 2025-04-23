@@ -4,33 +4,31 @@ from dotenv import load_dotenv
 from pytimeparse import parse
 
 
-load_dotenv()
-
-TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
-BOT = ptbot.Bot(TG_TOKEN)
+def say_timer_finished(author_id, bot):
+    bot.send_message(author_id, "Время вышло")
 
 
-def say_timer_finished(author_id):
-    BOT.send_message(author_id, "Время вышло")
-
-
-def countdown_answer(secs_left, author_id, message_id, secs_max):
-    BOT.update_message(author_id,
+def countdown_answer(secs_left, author_id, message_id, secs_max, bot):
+    bot.update_message(author_id,
                        message_id,
                        f"Осталось секунд: {secs_left}\n"
                        f"{render_progressbar(secs_max, secs_max - secs_left)}")
 
 
-def notify_progress(author_id, message):
+def notify_progress(author_id, message, bot):
     secs_max = parse(message)
     secs_left = parse(message)
-    message_id = BOT.send_message(author_id, "Запускаю таймер...")
-    BOT.create_countdown(secs_left,
+    message_id = bot.send_message(author_id, "Запускаю таймер...")
+    bot.create_countdown(secs_left,
                          countdown_answer,
                          author_id=author_id,
                          message_id=message_id,
-                         secs_max=secs_max)
-    BOT.create_timer(secs_left, say_timer_finished, author_id=author_id)
+                         secs_max=secs_max,
+                         bot=bot)
+    bot.create_timer(secs_left,
+                     say_timer_finished,
+                     author_id=author_id,
+                     bot=bot)
 
 
 def render_progressbar(total, iteration, prefix='', suffix='', length=30,
@@ -44,8 +42,11 @@ def render_progressbar(total, iteration, prefix='', suffix='', length=30,
 
 
 def main():
-    BOT.reply_on_message(notify_progress)
-    BOT.run_bot()
+    load_dotenv()
+    TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
+    bot = ptbot.Bot(TG_TOKEN)
+    bot.reply_on_message(notify_progress, bot=bot)
+    bot.run_bot()
 
 
 if __name__ == '__main__':
