@@ -43,8 +43,8 @@ def render_progressbar(total, iteration, prefix='', suffix='', length=30,
 
 def main():
     load_dotenv()
-    TG_TOKEN = os.getenv("TELEGRAM_TOKEN")
-    bot = ptbot.Bot(TG_TOKEN)
+    tg_token = os.getenv("TELEGRAM_TOKEN")
+    bot = ptbot.Bot(tg_token)
     bot.reply_on_message(notify_progress, bot=bot)
     bot.run_bot()
 
